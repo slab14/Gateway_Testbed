@@ -1,0 +1,26 @@
+{
+    "description": "1 flow through 1 Snort container",
+    "nf_platform": "docker",
+    "network_platform": "ovs",
+    "client_startip": "192.1.1.2",
+    "server_startip": "10.1.1.2",
+    "chains": {
+	"1null": [
+	    {
+		"tag": "jhelt/click-bridge"
+	    }
+	]
+    },
+    "users": {
+	"1flow": {
+	    "n_flows": 1
+	}
+    },
+    "routes": [
+	{
+	    "chain_id": "1null",
+	    "user_id": "1flow",
+	    "n": 1
+	}
+    ]
+}
