@@ -14,16 +14,20 @@ update() {
 
 install_docker() {
     echo "Installing Docker..."
-    sudo apt-get -qq install -y docker-compose 
+    sudo apt-get -yqq install docker-compose 
 
-    sudo apt-get -qq install -y apt-transport-https ca-certificates curl software-properties-common
+    sudo apt-get -yqq install apt-transport-https ca-certificates \
+	 curl software-properties-common
 
-    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg \
+	| sudo apt-key add -
 
-    sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+    loc="deb [arch=amd64] https://download.docker.com/linux/ubuntu "
+    loc+="$(lsb_release -cs) stable"
+    sudo add-apt-repository $loc
 
     sudo apt-get -qq update
-    sudo apt-get -qq install -y docker-ce
+    sudo apt-get -yqq install docker-ce
 
     sudo systemctl start docker
     sudo systemctl enable docker
@@ -32,13 +36,15 @@ install_docker() {
 
 install_python_packages() {
     echo "Installing Python..."
-    sudo apt-get -qq install -y python python-ipaddress python-subprocess32
+    sudo apt-get -yqq install python python-ipaddress python-subprocess32 \
+	 python-pip
     echo "Python Install Complete"
 }
 
 install_ovs() {
     echo "Installing OVS..."
-    sudo apt-get -qq install -y openvswitch-common openvswitch-switch openvswitch-dbg
+    sudo apt-get -yqq install openvswitch-common openvswitch-switch \
+	 openvswitch-dbg
     sudo systemctl start openvswitch-switch
     sudo systemctl enable openvswitch-switch
     echo "OVS Install Complete"
@@ -65,15 +71,15 @@ setup_bridge() {
     local client_side_if=$(find_interface_for_ip $CLIENT_SIDE_IP)
     local server_side_if=$(find_interface_for_ip $SERVER_SIDE_IP)
     
-    sudo ovs-vsctl --may-exist add-port $BRIDGE_NAME $client_side_if -- set Interface $client_side_if ofport_request=1
+    sudo ovs-vsctl --may-exist add-port $BRIDGE_NAME $client_side_if \
+	 -- set Interface $client_side_if ofport_request=1
     sudo ovs-ofctl mod-port $BRIDGE_NAME $client_side_if up
 
-    sudo ovs-vsctl --may-exist add-port $BRIDGE_NAME $server_side_if -- set Interface $server_side_if ofport_request=2
+    sudo ovs-vsctl --may-exist add-port $BRIDGE_NAME $server_side_if \
+	 -- set Interface $server_side_if ofport_request=2
     sudo ovs-ofctl mod-port $BRIDGE_NAME $server_side_if up
     echo "Bridge Setup Complete"
 }
-
-
 
 # Install packages
 echo "Beginning Dataplane Setup..."
