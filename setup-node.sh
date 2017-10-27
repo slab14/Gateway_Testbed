@@ -5,8 +5,8 @@
 
 #borrowed from Jeff Helt
 
-CLIENT_IP = 192.1.1.2
-SERVER_IP = 10.1.1.2
+CLIENT_IP=192.1.1.2
+SERVER_IP=10.1.1.2
 
 update() {
     echo "Updating apt-get..."
@@ -68,7 +68,7 @@ setup_ip_routes() {
     local interface=$(find_interface_for_ip $CLIENT_IP ||
 			  find_interface_for_ip $SERVER_IP)
 
-    if find_interfacefor_ip $CLIENT_IP; then
+    if find_interface_for_ip $CLIENT_IP; then
 	local ip=$SERVER_IP
     else
 	local ip=$CLIENT_IP
