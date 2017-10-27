@@ -57,7 +57,7 @@ int2ip() {
     echo $ip
 }
 
-netowrk() {
+network() {
     local addr=$(ip2int $1); shift
     local mask=$((0xffffffff << (32 -$1))); shift
     int2ip $((adr & mask))
