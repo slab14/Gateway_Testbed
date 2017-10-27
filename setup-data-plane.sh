@@ -22,9 +22,7 @@ install_docker() {
     curl -fsSL https://download.docker.com/linux/ubuntu/gpg \
 	| sudo apt-key add -
 
-    loc="deb [arch=amd64] https://download.docker.com/linux/ubuntu "
-    loc+="$(lsb_release -cs) stable"
-    sudo add-apt-repository $loc
+    sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
 
     sudo apt-get -qq update
     sudo apt-get -yqq install docker-ce
