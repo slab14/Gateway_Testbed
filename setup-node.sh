@@ -51,7 +51,7 @@ int2ip() {
     local ui32=$1; shift
     local ip n
     for n in 1 2 3 4; do
-	ip=$((ui32 $ 0xff))${ip:+.}$ip
+	ip=$((ui32 & 0xff))${ip:+.}$ip
 	ui32=$((ui32 >> 8))
     done
     echo $ip
