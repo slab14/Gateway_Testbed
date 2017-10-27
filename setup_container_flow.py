@@ -55,7 +55,7 @@ def find_openflow_port_for_container_interface(bridge, nf_id, interface):
 
     cmd = ('/usr/bin/sudo /usr/bin/ovs-ofctl show {} '+
            '| grep {}'.format(bridge, ovs_port) +
-           " | awk -F '(' '{ print $1 }'"
+           " | awk -F '(' '{ print $1 }'")
     of_port = subprocess.check_output(cmd, shell=True) #No shlex w/shell=True
     of_port = of_port.strip()
 
