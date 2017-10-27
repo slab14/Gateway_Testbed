@@ -65,8 +65,8 @@ network() {
 
 
 setup_ip_routes() {
-    local interface=$(find_interface_for_ip $CLIENT_IP ||
-			  find_interface_for_ip $SERVER_IP)
+    local interface=$(find_interface_for_ip $CLIENT_IP \
+			  || find_interface_for_ip $SERVER_IP)
 
     if find_interface_for_ip $CLIENT_IP; then
 	local ip=$SERVER_IP
@@ -75,8 +75,8 @@ setup_ip_routes() {
     fi
 
     local net=$(network $ip 16)
-    sudo ip route add $net/16 dev $interface ||
-	sudo ip route change $net/16 dev $interface
+    sudo ip route add $net/16 dev $interface \
+	|| sudo ip route change $net/16 dev $interface
 }
 
 # Install packages
