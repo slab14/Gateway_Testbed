@@ -61,6 +61,14 @@ find_interface_for_ip() {
   fi
 }
 
+disable_gro() {
+    local client_side_if=$(find_interface_for_ip $CLIENT_SIDE_IP)
+    local server_side_if=$(find_interface_for_ip $SERVER_SIDE_IP)
+    sudo ethtool -K $client_side_if gro off
+    sudo ethtool -K $server_side_if gro off
+}
+
+
 setup_bridge() {
     echo "Setting up basic Bridge..."
     sudo ovs-vsctl --may-exist add-br $BRIDGE_NAME
@@ -87,5 +95,6 @@ install_ovs
 install_python_packages
 
 # Setup
+disable_gro
 setup_bridge
 echo "Dataplane Ready"
