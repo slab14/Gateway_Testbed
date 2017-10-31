@@ -60,7 +60,7 @@ int2ip() {
 network() {
     local addr=$(ip2int $1); shift
     local mask=$((0xffffffff << (32 -$1))); shift
-    int2ip $((adr & mask))
+    int2ip $((addr & mask))
 }
 
 
