@@ -1,5 +1,11 @@
 # Borrowed from J. Helt
 
+## Requires input json file
+## requires output directory for saving output to
+
+# invocation example
+## python multi_iperf3_v1.py -E exp/001.json -O ../out -T client -I enps60f0
+
 from os import path
 import argparse
 import ipaddress

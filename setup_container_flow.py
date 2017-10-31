@@ -1,3 +1,9 @@
+# Borrowed from J. Helt
+
+# invocation example
+## python setup_container_flow.py -E exp/001.json -B br0 -T setup
+
+
 import argparse
 import ipaddress
 import itertools
@@ -53,9 +59,7 @@ def find_openflow_port_for_container_interface(bridge, nf_id, interface):
     ovs_port = subprocess.check_output(shlex.split(cmd))
     ovs_port = ovs_port.strip()
 
-    cmd = ('/usr/bin/sudo /usr/bin/ovs-ofctl show {} '+
-           '| grep {}'.format(bridge, ovs_port) +
-           " | awk -F '(' '{ print $1 }'")
+    cmd = '/usr/bin/sudo /usr/bin/ovs-ofctl show {} | grep {}'.format(bridge, ovs_port) + " | awk -F '(' '{ print $1 }'"
     of_port = subprocess.check_output(cmd, shell=True) #No shlex w/shell=True
     of_port = of_port.strip()
 
