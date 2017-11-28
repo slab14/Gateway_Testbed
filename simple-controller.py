@@ -1,6 +1,6 @@
 # Goal: Create simple controller for v0 demo (1 device to container, change policy)
 
-#import ipaddress
+import ipaddress
 import json
 import subprocess
 import shlex
@@ -31,8 +31,8 @@ def Get_FSM_DAG(fd):
     dev_policy = {}
     dev_policy['policy_description'] = json_data['description']
     dev_policy['nf_platform'] = json_data['nf_platform']
-#    in_ip = ipaddress.ip_address(json_data['in_port'])
-#    out_ip = ipaddress.ip_address(json_data['out_port'])
+    in_ip = ipaddress.ip_address(json_data['in_port'])
+    out_ip = ipaddress.ip_address(json_data['out_port'])
     dev_policy['in_ip'] = json_data['in_port']
     dev_policy['out_ip'] = json_data['out_port']
     dev_policy['n_devices'] = json_data['n_devices']
