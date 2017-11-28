@@ -59,7 +59,7 @@ def Get_FSM_DAG(fd):
 #Start-up NF Container
 def start_nf_container(init_mbox, name):
     cmd = ('/usr/bin/sudo /usr/bin/docker run -itd --rm ' +
-           '--netowrk=none --name {} {}')
+           '--network=none --name {} {}')
     cmd = cmd.format(init_mbox, name)
     subprocess.check_call(shlex.split(cmd))
     
