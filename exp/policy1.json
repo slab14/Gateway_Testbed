@@ -1,0 +1,28 @@
+{
+    "description": "v0-1 device, 1 container",
+    "nf_platform": "docker",
+    "in_port": "192.1.1.2",
+    "out_port": "10.1.1.2",
+    "n_devices": 1,
+    "policy": {
+	"device_0": {
+	    "state_machine": "NSC",
+	    "DAG": "basic_chain"
+	}
+    },
+    "FSM_defs": {
+	"NSC": {
+	    "0": "normal",
+	    "1": "suspicious",
+	    "2": "compromised",
+	    "n": "3"
+	}
+    },
+    "DAG_defs": {
+	"basic_chain":  {
+	    "normal": "jhelt/click-bridge",
+	    "suspicious": "jhelt/click-bridge, jhelt/snort",
+	    "compromised": "drop"
+	}
+    } 
+}
