@@ -4,6 +4,7 @@ import ipaddress
 import json
 import subprocess
 import shlex
+import itertools
 
 # TODO:
 # - Setup-flow
@@ -62,21 +63,90 @@ def start_nf_container(init_mbox, name):
            '--network=none --name {} {}')
     cmd = cmd.format(name, init_mbox)
     subprocess.check_call(shlex.split(cmd))
+
+
+def add_nf_flow(bridge, name, interfaces):
+    for interface in interfaces:
+        cmd = '/usr/bin/sudo /usr/bin/ovs-docker add-port {} {} {}'
+        cmd = cmd.format(bridge, interface, name)
+        subprocess.check_call(shlex.split(cmd))
     
+def find_of_port(bridge, name, interface):
+    cmd = '/usr/bin/sudo '
+    cmd += '/usr/bin/ovs-vsctl --data=bare --no-heading --columns=name find \
+    interface external_ids:container_id={} external_ids:container_iface={}'
+    cmd = cmd.format(name, interface)
+    ovs_port = subprocess.check_output(shlex.split(cmd))
+    ovs_port = ovs_port.strip()
+
+    cmd = '/usr/bin/sudo /usr/bin/ovs-ofctl show {} | grep {} '
+    cmd = cmd.format(name, ovs_port)
+    cmd += "| awk -F '(' '{ print $1 }'"
+    of_port = subprocess.check_output(cmd, shell=True)
+    of_port = of_port.strip()
+
+    return of_port
+
+
+def pairwise(iterable):
+    's -> (s0, s1), (s2, s3), (S4, s5), ...'
+    a = iter(iterable)
+    return itertools.izip(a,a)
+
+
+def install_route(bridge, name, interfaces, in_ip, out_ip):
+    interfaces = ('eth0', 'eth1')
+    of_ports = []
+    of_ports += [find_of_port(bridge, name, interface) for interface in interfaces]
+    of_ports = [1] + of_ports + [2]
+
+    # From device to mbox to outside
+    for in_port, out_port in pairwise(of_ports):
+        cmd = '/usr/bin/sudo /usr/bin/ovs-ofctl add-flow {} '.format(bridge)
+        cmd+='"priority=100 ip in_port={} nw_src={}"'.format(in_port, in_ip)
+        cmd+='" nw_dst={} actions=output:{}"'.format(out_ip, out_port)
+        subprocess.check_call(shlex.split(cmd))
+
+    # From outside to mbox to device
+    for in_port, out_port in pairwise(reverse(of_ports)):
+        cmd = '/usr/bin/sudo /usr/bin/ovs-ofctl add-flow {} '.format(bridge)
+        cmd+='"priority=100 ip in_port={} nw_src={}"'.format(in_port, out_ip)
+        cmd+='" nw_dst={} actions=output:{}"'.format(in_ip, out_port)
+        subprocess.check_call(shlex.split(cmd))
+
+    # All other traffic bypass mbox
+    cmd = ('/usr/bin/sudo /usr/bin/ovs-ofctl add-flow {} ' +
+           '"priority=0 in_port=1 actions=output:2"').format(bridge)
+    subprocess.check_call(shlex.split(cmd))
+    cmd = ('/usr/bin/sudo /usr/bin/ovs-ofctl add-flow {} ' +
+           '"priority=0 in_port=2 actions=output:1"').format(bridge)
+    subprocess.check_call(shlex.split(cmd))
+
 
 # Setup-flow
 # -- input is output of Get-FSM_DAG (or the variable that it creates).
-def setup_flow(states, flow):
+def setup_flow(states, flow, in_ip, out_ip, bridge):
+    interfaces = ('eth0', 'eth1')
+    bridge = br0
     init_mbox = flow[states[0]]
     name = states[0]
     start_nf_container(init_mbox, name)
-    
+    add_nf_flow(bridge, name, interfaces)
+    install_route(bridge, name, interfaces, in_ip, out_ip)
 
 def main():
+    parser = argparse.ArgumentParses(description='Run PSI demo, json policy')
+    parser.add_argument('--policy', '-P', required=True, type=str,
+                        help='path to json policy file')
+    parser.add_argument('--bridge', '-B', required=True, type=str,
+                        help='bridge name')
+    args = parser.parse_args()
+    
     policy = {}
-    policy = Get_FSM_DAG('exp/policy1.json')
+    policy = Get_FSM_DAG(args.policy)
     for i in range(0, policy['n_devices']):
-        setup_flow(policy[i]['states'], policy[i]['flow'])
+        setup_flow(policy[i]['states'], policy[i]['flow'],
+                   policy['in_port'], policy['out_port'], args.bridge)
 
 if __name__== '__main__':
     main()
