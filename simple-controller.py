@@ -1,10 +1,12 @@
 # Goal: Create simple controller for v0 demo (1 device to container, change policy)
 
+import argparse
 import ipaddress
 import json
 import subprocess
 import shlex
 import itertools
+import os
 
 # TODO:
 # - Setup-flow
@@ -80,7 +82,7 @@ def find_of_port(bridge, name, interface):
     ovs_port = ovs_port.strip()
 
     cmd = '/usr/bin/sudo /usr/bin/ovs-ofctl show {} | grep {} '
-    cmd = cmd.format(name, ovs_port)
+    cmd = cmd.format(bridge, ovs_port)
     cmd += "| awk -F '(' '{ print $1 }'"
     of_port = subprocess.check_output(cmd, shell=True)
     of_port = of_port.strip()
@@ -108,7 +110,7 @@ def install_route(bridge, name, interfaces, in_ip, out_ip):
         subprocess.check_call(shlex.split(cmd))
 
     # From outside to mbox to device
-    for in_port, out_port in pairwise(reverse(of_ports)):
+    for in_port, out_port in pairwise(reversed(of_ports)):
         cmd = '/usr/bin/sudo /usr/bin/ovs-ofctl add-flow {} '.format(bridge)
         cmd+='"priority=100 ip in_port={} nw_src={}"'.format(in_port, out_ip)
         cmd+='" nw_dst={} actions=output:{}"'.format(in_ip, out_port)
@@ -127,7 +129,6 @@ def install_route(bridge, name, interfaces, in_ip, out_ip):
 # -- input is output of Get-FSM_DAG (or the variable that it creates).
 def setup_flow(states, flow, in_ip, out_ip, bridge):
     interfaces = ('eth0', 'eth1')
-    bridge = br0
     init_mbox = flow[states[0]]
     name = states[0]
     start_nf_container(init_mbox, name)
@@ -135,7 +136,7 @@ def setup_flow(states, flow, in_ip, out_ip, bridge):
     install_route(bridge, name, interfaces, in_ip, out_ip)
 
 def main():
-    parser = argparse.ArgumentParses(description='Run PSI demo, json policy')
+    parser = argparse.ArgumentParser(description='Run PSI demo, json policy')
     parser.add_argument('--policy', '-P', required=True, type=str,
                         help='path to json policy file')
     parser.add_argument('--bridge', '-B', required=True, type=str,
@@ -146,7 +147,8 @@ def main():
     policy = Get_FSM_DAG(args.policy)
     for i in range(0, policy['n_devices']):
         setup_flow(policy[i]['states'], policy[i]['flow'],
-                   policy['in_port'], policy['out_port'], args.bridge)
+                   policy['in_ip'], policy['out_ip'], args.bridge)
+    stamp=os.stat(args.policy).st_mtime
 
 if __name__== '__main__':
     main()
