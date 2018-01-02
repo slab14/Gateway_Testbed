@@ -1,10 +1,12 @@
 #!/bin/bash
 
-sudo yum update
-sudo yum install -y git squid
+sudo yum update -y
+sudo yum install -y git squid httpd-tools
 git clone https://github.com/slab14/Gateway_Testbed.git
-cd Gateway_Testbed/HotNets_Demos/Matt_Repeat
 
-cp psi_squid.conf.1 /etc/squid/squid.conf
+touch /etc/squid/passwd && chown squid /etc/squid/passwd
+htpasswd /etc/squid/passwd tommy
+
+cp $HOME/Gateway_Testbed/HotNets_Demos/Matt_Repeat/psi_squid.conf.1 /etc/squid/squid.conf
 sudo systemctl restart squid
 

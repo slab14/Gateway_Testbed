@@ -1,25 +1,29 @@
 #!/bin/bash
 
+sudo yum update -y
 # Download required packages for running VMs
-sudo yum install -y libvirt-client virt-install genisoimage
+sudo yum install -y libvirt-client virt-install genisoimage qemu-kvm virt-manager qemu-img libvirt bridge-utils libvirt-python
+
+sudo systemctl restart libvirtd
 
 # Create place for VM images to reside
 mkdir -p ~/virt/images
-cd virt/images
+cd ~/virt/images
 
 # Download VM image
 IMAGE=CentOS-7-x86_64-GenericCloud.qcow2
 
 if [ ! -f "$IMAGE" ]; then
-    wget http://cloud.centos.org/centos7/images/$IMAGE.xz
+    wget http://cloud.centos.org/centos/7/images/$IMAGE.xz
     xz --decompress $IMAGE.xz
 fi
+
+cd $HOME/Gateway_Testbed/HotNets_Demos/Matt_Repeat
 
 # Setup SSH for VMs
 PUBKEY="$HOME/.ssh/id_rsa.pub"
 
-if [ ! -f PUBKEY ]; then
-    echo "place the below ssh key into vm installer script \n"
+if [ ! -f $PUBKEY ]; then
     ssh-keygen -t rsa
 fi
 
@@ -28,7 +32,7 @@ SSH_KEY=$(<$PUBKEY)
 # Generate VMs
 ./vm_create.sh $1
 ./vm_create.sh $2
-./vm_Create.sh $3
+./vm_create.sh $3
 
 # VM IP addresses for SSH
 VM1_IP=$(./find_ip.sh $1)
