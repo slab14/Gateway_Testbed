@@ -1,8 +1,18 @@
 #!/bin/bash
 
-sudo yum update -y
-# Download required packages for running VMs
-sudo yum install -y libvirt-client virt-install genisoimage qemu-kvm virt-manager qemu-img libvirt bridge-utils libvirt-python
+VERSION=$(sudo cat /etc/*-release | grep '^NAME="' | awk -F '"' '{ print $2 }')
+
+if [[ $VERSION =~ "CentOS" ]]; then
+    sudo yum update -y
+    sudo yum install -yqq libvirt libvirt-client libvirt-python qemu-kvm \
+	 virt-manager qemu-img genisoimage bridge-utils xauth
+fi
+
+if [[ $VERSION =~ "Ubuntu" ]]; then
+    sudo apt-get update -y
+    sudo apt-get install -yqq kvm cloud-utils genisoimage wget virt-manager \
+	 libvirt-bin qemu-kvm bridge-utils
+fi
 
 sudo systemctl restart libvirtd
 
@@ -24,7 +34,7 @@ cd $HOME/Gateway_Testbed/HotNets_Demos/Matt_Repeat
 PUBKEY="$HOME/.ssh/id_rsa.pub"
 
 if [ ! -f $PUBKEY ]; then
-    ssh-keygen -t rsa
+    ssh-keygen -t rsa -q -N
 fi
 
 SSH_KEY=$(<$PUBKEY)
