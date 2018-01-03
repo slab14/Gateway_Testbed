@@ -54,9 +54,9 @@ VM3_IP=$(./find_ip.sh $3)
 touch temp_vm1.txt
 echo "touch device_ip.txt
 echo "$VM2_IP" > device_ip.txt
-export http_server=http://$VM3_IP:3128" > temp_VM1.txt
+export http_server=http://$VM3_IP:3128" > temp_vm1.txt
 
-echo temp_VM1.txt >> vm1_setup.sh
+echo temp_vm1.txt >> vm1_setup.sh
 chmod +x vm1_setup.sh
 
 cat vm1_setup.sh | ssh -o StrictHostKeyChecking=no centos@$VM1_IP sh
