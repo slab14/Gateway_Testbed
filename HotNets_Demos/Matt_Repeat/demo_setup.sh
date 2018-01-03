@@ -10,8 +10,8 @@ fi
 
 if [[ $VERSION =~ "Ubuntu" ]]; then
     sudo apt-get update -y
-    sudo apt-get install -yqq kvm cloud-utils genisoimage wget virt-manager \
-	 libvirt-bin qemu-kvm bridge-utils
+    sudo apt-get install -y -q kvm genisoimage virt-manager libvirt-bin \
+	 qemu-kvm bridge-utils 
 fi
 
 sudo systemctl restart libvirtd
@@ -48,9 +48,6 @@ SSH_KEY=$(<$PUBKEY)
 VM1_IP=$(./find_ip.sh $1)
 VM2_IP=$(./find_ip.sh $2)
 VM3_IP=$(./find_ip.sh $3)
-echo "VM $1 is at $VM1_IP"
-echo "VM $2 is at $VM2_IP"
-echo "VM $3 is at $VM3_IP"
 
 ## Setup VMs
 # VM1 = user/attacker (name is $1)
@@ -62,12 +59,16 @@ export http_server=http://$VM3_IP:3128" > temp_VM1.txt
 echo temp_VM1.txt >> vm1_setup.sh
 chmod +x vm1_setup.sh
 
-cat vm1_setup.sh | ssh centos@$VM1_IP sh
+cat vm1_setup.sh | ssh -o StrictHostKeyChecking=no centos@$VM1_IP sh
 
 # VM2 = device (software emulation, name is $2)
-cat vm2_setup.sh | ssh centos@$VM2_IP sh
+cat vm2_setup.sh | ssh -o StrictHostKeyChecking=no centos@$VM2_IP sh
 
 # VM3 = Squid proxy server (name is $3)
-cat vm3_setup.sh | ssh centos@$VM3_IP sh
+cat vm3_setup.sh | ssh -o StrictHostKeyChecking=no centos@$VM3_IP sh
+
+echo "VM $1 is at $VM1_IP"
+echo "VM $2 is at $VM2_IP"
+echo "VM $3 is at $VM3_IP"
 
 

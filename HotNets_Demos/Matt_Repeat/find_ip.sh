@@ -1,6 +1,6 @@
 #!/bin/bash
 
-MAC=$(virsh dumpxml $1 | awk -F\' '/mac address/ {print $2}')
+MAC=$(sudo virsh dumpxml $1 | awk -F\' '/mac address/ {print $2}')
 
 while true
 do

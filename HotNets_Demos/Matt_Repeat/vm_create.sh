@@ -7,7 +7,7 @@ if ! [ $# -eq 1 ]; then
 fi
 
 # Check if domain already exists
-virsh dominfo $1 > /dev/null 2>&1
+sudo virsh dominfo $1 > /dev/null 2>&1
 if [ "$?" -eq 0 ]; then
     echo -n "[WARNING] $1 already exists.  "
     read -p "Do you want to overwrite $1 [y/N]? " -r
@@ -41,7 +41,7 @@ DISK=$1.qcow2
 BRIDGE=virbr0
 
 # Start clean
-rm -rf $DIR/$1
+sudo rm -rf $DIR/$1
 mkdir -p $DIR/$1
 
 pushd $DIR/$1 > /dev/null
@@ -50,8 +50,8 @@ pushd $DIR/$1 > /dev/null
     touch $1.log
 
     # Remove domain with the same name
-    virsh destroy $1 >> $1.log 2>&1
-    virsh undefine $1 >> $1.log 2>&1
+    sudo virsh destroy $1 >> $1.log 2>&1
+    sudo virsh undefine $1 >> $1.log 2>&1
 
     # cloud-init config: set hostname, remove cloud-init package,
     # and add ssh-key
@@ -92,15 +92,15 @@ _EOF_
     # Create CD-ROM ISO with cloud-init config
     genisoimage -output $CI_ISO -volid cidata -joliet -r $USER_DATA $META_DATA &>> $1.log
 
-    virt-install --import --name $1 --ram $MEM --vcpus $CPUS --disk \
+    sudo virt-install --import --name $1 --ram $MEM --vcpus $CPUS --disk \
     $DISK,format=qcow2,bus=virtio --disk $CI_ISO,device=cdrom --network \
     bridge=virbr0,model=virtio --os-type=linux --os-variant=rhel6 \
     --noautoconsole 
 
     # Eject cdrom
-    virsh change-media $1 hda --eject --config >> $1.log
+    sudo virsh change-media $1 hda --eject --config >> $1.log
 
     # Remove the unnecessary cloud init files
-    rm $USER_DATA $CI_ISO
+    sudo rm $USER_DATA $CI_ISO
 
 popd > /dev/null
