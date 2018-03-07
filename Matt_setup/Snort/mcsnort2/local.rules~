@@ -1,0 +1,1 @@
+drop icmp any any -> any any (msg:"ICMP Packet"; sid:10000002; rev:1;)
