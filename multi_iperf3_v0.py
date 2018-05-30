@@ -53,20 +53,23 @@ def main():
     network = ipaddress.ip_network(args.startip, strict=False)
     ips = [start_ip + i for i in range(n_proc)]
 
+    print("network = {}".format(network))
+    print("start_ip = {}".format(start_ip))
+    
     # Check that all ips are in the network
     if not all(map(lambda ip: ip in network, ips)):
         print('ERROR: You requested more ip addresses than are available ' +
               'in the network.')
         sys.exit(1)
-
+'''
     if args.type == 'server':
         procs = map(start_server, ips)
     elif args.type == 'client':
         procs = map(start_client, ips)
     else:
         raise ValueError('Unknown type: {}'.format(args.type))
-
-
+'''
+'''
     print 'Installing signal handlers'
     signal.signal(signal.SIGTERM, handler)
     signal.signal(signal.SIGINT, handler)
@@ -77,7 +80,7 @@ def main():
     print 'Cleaning up!'
     for p in procs:
         p.terminate()
-
+'''
 
 if __name__ == '__main__':
     main()

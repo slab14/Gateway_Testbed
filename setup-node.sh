@@ -5,8 +5,8 @@
 
 #borrowed from Jeff Helt
 
-CLIENT_IP=192.1.1.2
-SERVER_IP=10.1.1.2
+CLIENT_IP=10.10.1.3
+SERVER_IP=10.10.2.3
 
 update() {
     echo "Updating apt-get..."
